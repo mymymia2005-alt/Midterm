@@ -9,10 +9,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, r2_score
 
 
-# -------------------------------------------------------
-# Page Configuration
-# -------------------------------------------------------
-
 st.set_page_config(
     page_title="Student Performance Prediction App",
     layout="wide"
@@ -21,19 +17,9 @@ st.set_page_config(
 st.title("Student Performance Prediction App")
 
 
-# -------------------------------------------------------
-# Load Dataset
-# -------------------------------------------------------
-
 df = pd.read_csv("student_data.csv", sep=";")
 
-# Remove rows with missing values
 df = df.dropna()
-
-
-# -------------------------------------------------------
-# Sidebar Navigation
-# -------------------------------------------------------
 
 st.sidebar.title("Navigation")
 
@@ -46,11 +32,7 @@ page = st.sidebar.radio(
     ]
 )
 
-
-# -------------------------------------------------------
 # Page 1: Business Case & Data Presentation
-# -------------------------------------------------------
-
 if page == "Business Case & Data Presentation":
 
     st.header("Business Case")
@@ -107,9 +89,7 @@ if page == "Business Case & Data Presentation":
     st.dataframe(df.describe())
 
 
-# -------------------------------------------------------
 # Page 2: Data Visualization
-# -------------------------------------------------------
 
 elif page == "Data Visualization":
 
@@ -121,10 +101,8 @@ elif page == "Data Visualization":
     students' final grades and to identify possible academic risk factors.
     """)
 
-    # -------------------------------------------------------
+    
     # 1. Distribution of Final Grades
-    # -------------------------------------------------------
-
     st.subheader("1. Distribution of Final Grades")
 
     fig, ax = plt.subplots()
@@ -142,10 +120,7 @@ elif page == "Data Visualization":
     is not evenly distributed.
     """)
 
-    # -------------------------------------------------------
     # 2. Relationship Between G2 and G3
-    # -------------------------------------------------------
-
     st.subheader("2. Relationship Between Previous Grade G2 and Final Grade G3")
 
     fig, ax = plt.subplots()
@@ -163,10 +138,7 @@ elif page == "Data Visualization":
     cases such as failing to complete the final evaluation.
     """)
 
-    # -------------------------------------------------------
     # 3. Relationship Between Absences and Final Grade
-    # -------------------------------------------------------
-
     st.subheader("3. Relationship Between Absences and Final Grade")
 
     fig, ax = plt.subplots()
@@ -183,10 +155,7 @@ elif page == "Data Visualization":
     absences may matter, but they are probably not enough by themselves to explain final performance.
     """)
 
-    # -------------------------------------------------------
     # 4. Correlation Heatmap
-    # -------------------------------------------------------
-
     st.subheader("4. Correlation Heatmap")
 
     numeric_df = df.select_dtypes(include=["int64", "float64"])
@@ -204,10 +173,7 @@ elif page == "Data Visualization":
     contribute to the model but are not the main driving factors.
     """)
 
-    # -------------------------------------------------------
     # 5. Final Grade by Number of Past Failures
-    # -------------------------------------------------------
-
     st.subheader("5. Final Grade by Number of Past Failures")
 
     fig, ax = plt.subplots()
@@ -226,10 +192,7 @@ elif page == "Data Visualization":
     risk-related variable for the prediction model.
     """)
 
-    # -------------------------------------------------------
     # 6. Final Grade by Study Time
-    # -------------------------------------------------------
-
     st.subheader("6. Final Grade by Study Time")
 
     fig, ax = plt.subplots()
@@ -249,10 +212,7 @@ elif page == "Data Visualization":
     """)
 
 
-# -------------------------------------------------------
 # Page 3: Prediction Model
-# -------------------------------------------------------
-
 elif page == "Prediction Model":
 
     st.header("Linear Regression Prediction Model")
@@ -300,10 +260,7 @@ elif page == "Prediction Model":
     A higher R² score means the model explains more of the outcome.
     """)
 
-    # -------------------------------------------------------
     # Actual vs Predicted Plot
-    # -------------------------------------------------------
-
     st.subheader("Actual vs Predicted Final Grades")
 
     fig, ax = plt.subplots()
@@ -314,15 +271,17 @@ elif page == "Prediction Model":
     st.pyplot(fig)
 
     st.write("""
-    This plot compares the model's predicted final grades with the actual final grades. If the model 
-    predicts well, the points should roughly follow an upward diagonal pattern. This helps us visually 
-    evaluate whether the linear regression model is making reasonable predictions.
+    This plot shows that the model predicts final grades fairly well for most students. 
+    The points generally follow an upward pattern, meaning that students with higher actual final grades 
+    also tend to receive higher predicted grades. This makes sense because the model uses G1 and G2, which 
+    are strongly related to G3. However, the model has more difficulty with students whose actual final 
+    grade is 0. For several of these students, the model still predicts a grade around 6 to 8, which suggests 
+    that the model does not fully capture special cases such as failing, dropping the course, or missing the 
+    final assessment. Overall, the model is useful for predicting general grade patterns, but it is less 
+    accurate for extreme low outcomes.
     """)
 
-    # -------------------------------------------------------
     # Model Coefficients
-    # -------------------------------------------------------
-
     st.subheader("Model Coefficients")
 
     coefficients = pd.DataFrame({
@@ -333,15 +292,18 @@ elif page == "Prediction Model":
     st.dataframe(coefficients)
 
     st.write("""
-    The coefficients show how each variable contributes to the prediction.
-    A positive coefficient means that as the variable increases, the predicted final grade also tends to increase.
-    A negative coefficient means that as the variable increases, the predicted final grade tends to decrease.
+    The coefficient table shows that G2 is the strongest positive predictor in the model. 
+    Its coefficient is much larger than the coefficient for G1, which means the second period grade 
+    contributes more strongly to the predicted final grade when the other variables are held constant. 
+    Past failures has a negative coefficient, meaning students with more previous class failures are 
+    predicted to have lower final grades. Study time also has a small negative coefficient in this model, 
+    but this does not necessarily mean studying is harmful. It may be because study time overlaps with 
+    other variables, or because students who struggle more may report studying more. Absences has a very 
+    small positive coefficient, so it does not appear to be an important driver of prediction in this model. 
+    Overall, the model relies mostly on previous academic performance, especially G2.
     """)
 
-    # -------------------------------------------------------
     # User Prediction
-    # -------------------------------------------------------
-
     st.subheader("Make a Prediction")
 
     st.write("""
